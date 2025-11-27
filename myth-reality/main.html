@@ -1,0 +1,447 @@
+<div id="estate-quiz-root"></div>
+
+<style>
+  :root {
+    --dl-gold: #c39a57;
+    --dl-gold-dark: #a88247;
+    --dl-bg-soft: #f9f5f0;
+    --card-bg: #ffffff;
+    --soft-gray: #f4f4f6;
+  }
+
+  /* ------------------------- GLOBAL CONTAINER ------------------------- */
+  body,
+  html {
+    margin: 0;
+    padding: 0;
+    background: var(--dl-bg-soft);
+  }
+
+  #estate-quiz-root {
+    font-family: "Inter", sans-serif;
+    width: 100%;
+    max-width: 750px;
+    margin: 0 auto;
+    padding: 20px;
+  }
+
+  /* ------------------------- PROGRESS BAR ------------------------- */
+  .progress-bar-container {
+    width: 100%;
+    background: #e8e8e8;
+    height: 10px;
+    border-radius: 20px;
+    margin-bottom: 25px;
+    overflow: hidden;
+  }
+
+  .progress-bar-fill {
+    height: 100%;
+    width: 0%;
+    background: var(--dl-gold);
+    transition: width 0.35s ease;
+  }
+
+  /* ------------------------- HEADERS ------------------------- */
+  .quiz-header {
+    font-size: 28px;
+    margin-bottom: 12px;
+    font-weight: 700;
+    text-align: center;
+    color: #333;
+  }
+
+  .quiz-subheader {
+    text-align: center;
+    font-size: 17px;
+    color: #666;
+    margin-bottom: 30px;
+  }
+
+  /* ------------------------- QUESTION CARD ------------------------- */
+  .quiz-card {
+    background: var(--card-bg);
+    padding: 22px;
+    border-radius: 14px;
+    margin-bottom: 30px;
+    border: 1px solid #e3e3e3;
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.04);
+  }
+
+  .quiz-question-text {
+    font-size: 20px;
+    margin-bottom: 18px;
+    font-weight: 600;
+    color: #333;
+  }
+
+  .quiz-option {
+    padding: 14px 16px;
+    margin: 10px 0;
+    background: white;
+    border: 1px solid #d7d7d7;
+    border-radius: 12px;
+    cursor: pointer;
+    font-size: 16px;
+    transition: 0.2s ease;
+  }
+
+  .quiz-option:hover {
+    background: #f3f3f3;
+  }
+
+  .quiz-option.selected {
+    border-color: var(--dl-gold);
+    background: #fff8ef;
+  }
+
+  /* ------------------------- BUTTONS ------------------------- */
+  .quiz-btn,
+  .calendly-btn {
+    margin-top: 20px;
+    width: 100%;
+    padding: 14px 24px;
+    border-radius: 12px;
+    border: none;
+    cursor: pointer;
+    font-size: 17px;
+    font-weight: 600;
+    background: var(--dl-gold);
+    color: white;
+    transition: 0.25s ease;
+    text-align: center;
+    display: inline-block;
+    text-decoration: none;
+    box-sizing: border-box;
+  }
+
+  .quiz-btn:hover,
+  .calendly-btn:hover {
+    background: var(--dl-gold-dark);
+  }
+
+  /* ------------------------- PROGRESS ------------------------- */
+  .quiz-progress {
+    font-size: 15px;
+    margin-bottom: 12px;
+    text-align: right;
+    color: #777;
+  }
+
+  /* ------------------------- RESULTS ------------------------- */
+  .result-section {
+    background: var(--card-bg);
+    padding: 28px;
+    border-radius: 14px;
+    border: 1px solid #e3e3e3;
+    margin-top: 20px;
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.04);
+  }
+
+  .result-title {
+    font-size: 20px;
+    margin-top: 20px;
+    margin-bottom: 10px;
+    font-weight: 700;
+  }
+
+  .result-block {
+    background: #fff;
+    padding: 18px;
+    border-radius: 12px;
+    border: 1px solid #e5e5e5;
+    margin-top: 10px;
+    font-size: 16px;
+    line-height: 1.55;
+  }
+
+  /* ------------------------- EMAIL FORM ------------------------- */
+  .email-form {
+    margin-top: 30px;
+    background: #fff;
+    padding: 22px;
+    border-radius: 14px;
+    border: 1px solid #ddd;
+  }
+
+  .email-form h3 {
+    margin-top: 0;
+    margin-bottom: 12px;
+    font-size: 18px;
+  }
+
+  .email-form input {
+    width: 100%;
+    padding: 14px;
+    border-radius: 12px;
+    border: 1px solid #bbb;
+    margin-bottom: 12px;
+    font-size: 15px;
+  }
+
+  .email-form button {
+    width: 100%;
+    padding: 14px;
+    border-radius: 12px;
+    border: none;
+    cursor: pointer;
+    background: var(--dl-gold);
+    color: white;
+    font-size: 17px;
+    font-weight: 600;
+  }
+
+  .email-success {
+    margin-top: 15px;
+    color: #2c8f4e;
+    font-weight: 600;
+  }
+
+  /* ------------------------- MOBILE ------------------------- */
+  @media (max-width: 640px) {
+    #estate-quiz-root {
+      padding: 16px;
+    }
+    .quiz-header {
+      font-size: 24px;
+    }
+    .quiz-question-text {
+      font-size: 18px;
+    }
+    .quiz-btn {
+      font-size: 16px;
+    }
+  }
+</style>
+
+<script>
+  /* =========================================================================
+   CONSTANTS & QUIZ CONFIG
+   ========================================================================= */
+  const RELAY_URL = "https://estate-quiz-relay.onrender.com/generate-report";
+  const ZAPIER_ENDPOINT =
+    "https://hooks.zapier.com/hooks/catch/20883707/ukubsjx/"; // <-- Replace
+
+  const QUESTIONS = [
+    {
+      q: "Myth or Reality? A Will avoids probate in California.",
+      a: "Myth",
+      explanation:
+        "A Will does NOT avoid probate in CA. Only a properly funded Living Trust does.",
+    },
+    {
+      q: "Myth or Reality? Your spouse automatically inherits everything.",
+      a: "Myth",
+      explanation:
+        "Without a Trust, assets may be split between spouse & kids under intestacy laws.",
+    },
+    {
+      q: "Myth or Reality? Probate fees can exceed $25,000+ on a $700,000 home.",
+      a: "Reality",
+      explanation:
+        "Statutory CA probate fees on a $700K estate are typically $28K+.",
+    },
+    {
+      q: "Myth or Reality? Medical decisions require a Power of Attorney.",
+      a: "Myth",
+      explanation:
+        "Medical decisions require an Advance Healthcare Directive, not a POA.",
+    },
+    {
+      q: "Myth or Reality? You must be wealthy to need a Trust.",
+      a: "Myth",
+      explanation:
+        "In CA, even modest homes trigger probate. Trusts help everyday families.",
+    },
+    {
+      q: "Myth or Reality? Bank accounts automatically transfer to kids.",
+      a: "Myth",
+      explanation:
+        "Only accounts with beneficiaries/POD transfer outside probate.",
+    },
+    {
+      q: "Myth or Reality? Probate usually takes 12–18 months in CA.",
+      a: "Reality",
+      explanation: "CA probates often exceed a year due to court backlog.",
+    },
+    {
+      q: "Myth or Reality? A Trust must be funded to work.",
+      a: "Reality",
+      explanation:
+        "If assets aren't titled into the Trust, probate can still occur.",
+    },
+    {
+      q: "Myth or Reality? Joint tenancy is always safest.",
+      a: "Myth",
+      explanation:
+        "Joint tenancy has risks like unintended co-ownership & probate later.",
+    },
+    {
+      q: "Myth or Reality? Parents need Guardian Nominations for minors.",
+      a: "Reality",
+      explanation:
+        "Without legal nominations, family disputes or CPS involvement can occur.",
+    },
+  ];
+
+  let currentIndex = 0;
+  let score = 0;
+  let selectedAnswer = null;
+
+  const root = document.getElementById("estate-quiz-root");
+
+  /* =========================================================================
+   RENDER QUESTION
+   ========================================================================= */
+  function renderQuestion() {
+    const q = QUESTIONS[currentIndex];
+    root.innerHTML = `
+    <div class="quiz-progress">Question ${currentIndex + 1} of ${
+      QUESTIONS.length
+    }</div>
+    <div class="quiz-header">Estate Planning Myth or Reality?</div>
+    <div class="quiz-subheader">Quick 1-minute knowledge check</div>
+
+    <div class="quiz-card">
+      <div class="quiz-question-text">${q.q}</div>
+      <div class="quiz-option" onclick="selectOption('Myth')">Myth</div>
+      <div class="quiz-option" onclick="selectOption('Reality')">Reality</div>
+    </div>
+    <button class="quiz-btn" onclick="nextQuestion()">Next →</button>
+  `;
+    selectedAnswer = null;
+  }
+
+  function selectOption(ans) {
+    selectedAnswer = ans;
+    document
+      .querySelectorAll(".quiz-option")
+      .forEach((e) => e.classList.remove("selected"));
+    event.target.classList.add("selected");
+  }
+
+  function nextQuestion() {
+    if (!selectedAnswer) return alert("Please choose an answer.");
+    if (selectedAnswer === QUESTIONS[currentIndex].a) score++;
+    currentIndex++;
+    currentIndex < QUESTIONS.length ? renderQuestion() : renderResults();
+  }
+
+  /* =========================================================================
+   PERSONA LOGIC
+   ========================================================================= */
+  function getPersona(score) {
+    if (score <= 3) return '🧩 The "I Thought I Was Covered" Parent';
+    if (score <= 7) return '📘 The "Getting There" Planner';
+    return '🏆 The "Legacy Builder"';
+  }
+
+  var insights = "";
+  /* =========================================================================
+   RESULTS PAGE
+   ========================================================================= */
+  async function renderResults() {
+    const persona = getPersona(score);
+    root.innerHTML = `
+    <div class="quiz-header">Your Results</div>
+
+    <div class="result-section">
+      <div class="result-title">Your Score</div>
+      <div class="result-block"><strong>${score}/10</strong></div>
+
+      <div class="result-title">Your Persona</div>
+      <div class="result-block">${persona}</div>
+
+      <div class="result-title">Your Personalized Guidance</div>
+      <div class="result-block" id="gpt-report">
+        Generating your custom report…
+      </div>
+
+      <!-- NEW CALENDLY BUTTON -->
+      <a
+        href="https://calendly.com/decosimolaw/15min?month=2024-12"
+        target="_blank"
+        class="calendly-btn"
+        id="calendly-button"
+      >
+        Book Your Free 15-Minute Call →
+      </a>
+    </div>
+
+    ${renderEmailForm()}
+  `;
+
+    generateReport(score, persona);
+  }
+
+  /* =========================================================================
+   CALL RENDER RELAY → OPENAI SECURELY
+   ========================================================================= */
+  async function generateReport(score, persona) {
+    try {
+      const response = await fetch(RELAY_URL, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ score, persona }),
+      });
+
+      const data = await response.json();
+      insights = data;
+      document.getElementById("gpt-report").innerHTML =
+        data.report || "Unable to generate report.";
+    } catch (e) {
+      insights = "Not Found";
+      document.getElementById("gpt-report").innerHTML =
+        "Server temporarily unavailable.";
+    } finally {
+      submitEmail("support@decosimolaw.com");
+    }
+  }
+
+  /* =========================================================================
+   EMAIL FORM + ZAPIER SEND
+   ========================================================================= */
+  function renderEmailForm() {
+    return `
+    <div class="email-form">
+      <h3 style="margin-top:0;">Email my estate planning checklist</h3>
+      <input id="quiz-email" type="email" placeholder="Your email address" />
+      <button onclick="submitEmail()">Send</button>
+      <div id="email-status"></div>
+    </div>
+  `;
+  }
+
+  async function submitEmail(overrideEmail) {
+    const email = overrideEmail || document.getElementById("quiz-email").value;
+    const status = document.getElementById("email-status");
+
+    if (!email.includes("@")) {
+      status.innerHTML = "Please enter a valid email.";
+      return;
+    }
+
+    const payload = {
+      email,
+      score,
+      persona: getPersona(score),
+      insights: (insights || { report: "" }).report,
+      timestamp: new Date().toISOString(),
+    };
+
+    await fetch(ZAPIER_ENDPOINT, {
+      method: "POST",
+      body: JSON.stringify(payload),
+    });
+
+    if (!overrideEmail) {
+      status.innerHTML = "Great! Check your inbox.";
+      status.classList.add("email-success");
+    }
+  }
+
+  /* =========================================================================
+   START QUIZ
+   ========================================================================= */
+  renderQuestion();
+</script>
